@@ -50,7 +50,7 @@ Before you begin, make sure you have the following:
     - The load balancer forwards external traffic to the app on port 8000
     - The app connects to the database on port 5432 internally
 
-> **Note:** We tested these versions during development. <br> Newer releases may work but aren't verified.
+> **Note:** These are the exact versions used during development. Newer releases, such as newer Docker or Docker Compose versions, may work but aren't verified.
 
 ## Google Cloud Platform (GCP) Setup
 
