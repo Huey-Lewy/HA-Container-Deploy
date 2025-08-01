@@ -1,24 +1,4 @@
-# (Cloud Vitals) Agent
-.agent_venv
-.agent_venvrc
-.agent_venv/
-agent_venv/
-AGENT_VENV/
-agent_env/
-agent_env.bak/
-agent_venv.bak/
-agent/tmp
-
-# (Cloud Vitals) Dashboard
-.dash_venv
-.dash_venvrc
-.dash_venv/
-dash_venv/
-DASH_VENV/
-dash_env/
-dash_env.bak/
-dash_venv.bak/
-dash/tmp
+# (HA Container Deploy)
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -204,11 +184,11 @@ cython_debug/
 .abstra/
 
 # Visual Studio Code
-#  Visual Studio Code specific template is maintained in a separate VisualStudioCode.gitignore 
+#  Visual Studio Code specific template is maintained in a separate VisualStudioCode.gitignore
 #  that can be found at https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
-#  and can be added to the global gitignore or merged into this file. However, if you prefer, 
+#  and can be added to the global gitignore or merged into this file. However, if you prefer,
 #  you could uncomment the following to ignore the entire vscode folder
-# .vscode/
+.vscode/
 
 # Ruff stuff:
 .ruff_cache/

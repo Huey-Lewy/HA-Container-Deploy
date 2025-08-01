@@ -1,39 +1,42 @@
 # About HA-Container-Deploy
 
-**HA Container Deploy** automates the high-availability deployment of a containerized web application and database on Google Cloud. It sets up multiple app replicas behind a load balancer, utilizes LVM-backed storage for the database, and includes scripts to provision and deploy the necessary infrastructure.
+**HA Container Deploy** is a one-step solution for deploying a high-availability PHP + NGINX web application with a MariaDB database on Docker Swarm. Key features include:
+- **High Availability**:Three synced PHP + NGINX replicas with a shared MariaDB backend.
+- **Built-in HTTPS**: Caddy handles TLS, reverse proxy, and load balancing.
+- **One-Step Deployment**: Scripts handles managing secrets, networks, volumes, and stack setup.
+- **Cloud-Ready**: Optimized and developed for Docker Swarm on a Google Cloud Ubuntu VM instance.
 
-## Repository Layout (WIP)
+## Repository Layout
 
 ```
-├── app/            # Build web application image
-│   ├── Dockerfile          # Docker build instructions for app
-│   └── src/                # Application source code
-│       ├── main.py                 # Entry point script
-│       └── requirements.txt        # Python dependencies list
+├── config/                 # Service config files
+│   ├── caddy/                  # Caddy reverse proxy + TLS
+│   │   └── Caddyfile               # Proxy rules, load balancing, health checks
+│   └── nginx/                  # Internal web server
+│       └── default.conf            # FastCGI and static file handling
 │
-├── db/             # Database image and LVM config
-│   ├── Dockerfile          # Docker build instructions for DB
-│   ├── init.sql            # Initialize database schema
-│   └── lvm/                # LVM setup scripts
-│       └── create-volumes.sh       # Script to create LVM volumes
+├── db/                     # MariaDB
+│   ├── Dockerfile              # Build MariaDB image
+│   ├── init.sql                # Create score table, seed initial value
+│   ├── index.html              # Static page stored as blob in database
+│   └── load_index_html.sh      # Load index.html into score table
 │
-├── config/         # Load balancer and server configs
-│   ├── haproxy/            # HAProxy configuration folder
-│   │   └── haproxy.cfg             # HAProxy rules file
-│   └── nginx/              # Nginx configuration folder
-│       └── nginx.conf              # Nginx server block file
+├── scripts/                # Automation scripts
+│   ├── generate-secrets.sh     # Create Docker Swarm secrets
+│   ├── run.sh                  # Create networks/volumes, deploy stack
+│   └── teardown.sh             # Remove stack, clean up resources
 │
-├── scripts/        # Automation and infrastructure scripts
-│   ├── create-volumes.sh   # Create LVM volumes
-│   ├── deploy.sh           # Deploy containers and services
-│   ├── healthcheck.sh      # Check service health status
-│   └── teardown.sh         # Tear down and clean up resources
+├── web/                    # PHP + NGINX
+│   ├── Dockerfile              # Build PHP/NGINX image
+│   └── src/                    # Application source code
+│       ├── composer.json           # PHP dependencies
+│       ├── index.php               # Fetch score, render page with button
+│       └── update_score.php        # Endpoint to increment and return score
 │
-├── .gitignore      # Define ignored files for Git
-├── LICENSE         # Project license file
-├── README.md       # Project overview and setup instructions
-├── docker-compose.yml      # Define and compose containers
-└── .env.example            # Sample environment variable definitions
+├── docker-stack.yml    # Swarm stack definition
+├── .gitignore  # Git ignore rules
+├── LICENSE     # License terms
+└── README.md   # Project overview and quick-start
 ```
 
 ## Prerequisites
