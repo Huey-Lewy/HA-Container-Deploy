@@ -1,0 +1,99 @@
+# Docker Swarm stack: HA PHP+NGINX+MariaDB with Caddy
+
+services:
+  # Caddy: HTTP reverse proxy and load balancer
+  caddy:
+    image: caddy:2
+    ports:
+      - "80:80"     # Accept traffic
+      - "443:443"   # Catch HTTPS and redirect to HTTP
+    configs:
+      - source: caddyfile   # Mount Caddyfile
+        target: /etc/caddy/Caddyfile
+    networks:
+      - ha_overlay
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+  # MariaDB: single database service
+  db:
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    image: ha-app-db:latest
+    volumes:
+      - mariadb_data:/var/lib/mysql   # Persistent data
+    secrets:
+      - db_root_password    # Root password
+      - db_user_password    # User password
+    environment:
+      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+      MARIADB_DATABASE: ha_app
+      MARIADB_USER: ha_app_user
+      MARIADB_PASSWORD_FILE: /run/secrets/db_user_password
+    networks:
+      - ha_overlay
+    deploy:
+      restart_policy:
+        condition: on-failure
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mysqladmin ping -h localhost -uroot -p$(cat /run/secrets/db_root_password) --silent"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Web: PHP+NGINX tier with 3 replicas
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    image: ha-app-web:latest
+    user: www-data    # Run as non-root
+    secrets:
+      - db_user_password    # Use app user password
+    environment:
+      DB_HOST: db
+      DB_NAME: ha_app
+      DB_USER: ha_app_user
+      DB_PASSWORD_FILE: /run/secrets/db_user_password
+    networks:
+      - ha_overlay
+    deploy:
+      replicas: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost/health"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+
+# Mount Caddyfile
+configs:
+  caddyfile:
+    file: ./config/caddy/Caddyfile
+
+# Persistent volume for MariaDB
+volumes:
+  mariadb_data:
+    external: true
+
+# Overlay network (created by run.sh)
+networks:
+  ha_overlay:
+    external: true
+
+# Docker secrets (created by generate-secrets.sh)
+secrets:
+  db_root_password:
+    external: true
+  db_user_password:
+    external: true

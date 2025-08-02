@@ -1,7 +1,7 @@
 # About HA-Container-Deploy
 
 **HA Container Deploy** is a one-step solution for deploying a high-availability PHP + NGINX web application with a MariaDB database on Docker Swarm. Key features include:
-- **High Availability**:Three synced PHP + NGINX replicas with a shared MariaDB backend.
+- **High Availability**: Three synced PHP + NGINX replicas with a shared MariaDB backend.
 - **HTTP only**: Caddy listens on port 80 for HTTP, handles reverse proxy and load balancing, and redirects any HTTPS requests on port 443 back to HTTP.
 - **One-Step Deployment**: Scripts handles managing secrets, networks, volumes, and stack setup.
 - **Cloud-Ready**: Optimized and developed for Docker Swarm on a Google Cloud Ubuntu VM instance.
