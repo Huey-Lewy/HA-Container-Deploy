@@ -3,10 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <title>Score Counter</title>
+  <link rel="stylesheet" href="styles/style.css">
 </head>
 <body>
-  <h1>Current Score: {{score}}</h1>
-  <button id="increase-btn">Click here to increase score</button>
+  <div class="center-header">
+    <h1>Current Score: {{score}}</h1>
+  </div>
+  <button id="increase-btn">Click here to increase score!</button>
   <script>
     document.getElementById('increase-btn').addEventListener('click', function() {
       fetch('/update_score.php')
