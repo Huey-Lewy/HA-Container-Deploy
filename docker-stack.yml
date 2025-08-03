@@ -6,12 +6,13 @@ services:
     image: caddy:2
     ports:
       - "80:80"     # Accept traffic
-      - "443:443"   # Catch HTTPS and redirect to HTTP
     configs:
       - source: caddyfile   # Mount Caddyfile
         target: /etc/caddy/Caddyfile
     networks:
       - ha_overlay
+    depends_on:
+      - db
     deploy:
       restart_policy:
         condition: on-failure
@@ -23,29 +24,26 @@ services:
       dockerfile: Dockerfile
     image: ha-app-db:latest
     volumes:
-      - mariadb_data:/var/lib/mysql   # Persistent data
-    secrets:
-      - db_root_password    # Root password
-      - db_user_password    # User password
+      - mariadb_data:/var/lib/mysql
     environment:
-      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
-      MARIADB_DATABASE: ha_app
-      MARIADB_USER: ha_app_user
-      MARIADB_PASSWORD_FILE: /run/secrets/db_user_password
+      - MARIADB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MARIADB_DATABASE=${DB_NAME}
+      - MARIADB_USER=${DB_USER}
+      - MARIADB_PASSWORD=${DB_USER_PASSWORD}
     networks:
-      - ha_overlay
+      ha_overlay:
+        aliases:
+          - ha_stack_db
+          - db
     deploy:
       restart_policy:
         condition: on-failure
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "mysqladmin ping -h localhost -uroot -p$(cat /run/secrets/db_root_password) --silent"
-        ]
+      test: ["CMD-SHELL", "mariadb-admin ping -uroot -p${DB_ROOT_PASSWORD} --silent"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
 
   # Web: PHP+NGINX tier with 3 replicas
   web:
@@ -53,21 +51,19 @@ services:
       context: .
       dockerfile: web/Dockerfile
     image: ha-app-web:latest
-    user: www-data    # Run as non-root
-    secrets:
-      - db_user_password    # Use app user password
     environment:
-      DB_HOST: db
-      DB_NAME: ha_app
-      DB_USER: ha_app_user
-      DB_PASSWORD_FILE: /run/secrets/db_user_password
+      - DB_HOST=ha_stack_db
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_USER_PASSWORD=${DB_USER_PASSWORD}
+    depends_on:
+      - db
+      - caddy
     networks:
       - ha_overlay
     deploy:
+      mode: replicated
       replicas: 3
-      update_config:
-        parallelism: 1
-        delay: 10s
       restart_policy:
         condition: on-failure
     healthcheck:
@@ -85,15 +81,9 @@ configs:
 volumes:
   mariadb_data:
     external: true
+    name: mariadb_data
 
 # Overlay network (created by run.sh)
 networks:
   ha_overlay:
-    external: true
-
-# Docker secrets (created by generate-secrets.sh)
-secrets:
-  db_root_password:
-    external: true
-  db_user_password:
-    external: true
+    driver: overlay

@@ -1,21 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SECRETS=(db_root_password db_user_password)
+# Determine script and repo root directories
+SCRIPTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(dirname "$SCRIPTS_DIR")"
 
-# 1. Build random passwords
-root_pw=$(date +%s%N | sha256sum | cut -c1-32)
-user_pw=$(date +%s%N | sha256sum | cut -c1-32)
+# Set database credentials
+DB_NAME="ha_app"
+DB_USER="ha_user"
+DB_ROOT_PASSWORD="$(head -c16 /dev/urandom | od -An -tx1 | tr -d ' \n')"
+DB_USER_PASSWORD="$(head -c16 /dev/urandom | od -An -tx1 | tr -d ' \n')"
 
-# 2. Remove old secrets
-for secret in "${SECRETS[@]}"; do
-  if docker secret inspect "$secret" &>/dev/null; then
-    docker secret rm "$secret"
-  fi
-done
+# Write .env at repo root
+env_path="$ROOT_DIR/.env"
+cat > "$env_path" <<EOF
+DB_NAME=${DB_NAME}
+DB_USER=${DB_USER}
+DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+DB_USER_PASSWORD=${DB_USER_PASSWORD}
+EOF
 
-# 3. Create new secrets
-echo "$root_pw" | docker secret create db_root_password -
-echo "$user_pw" | docker secret create db_user_password -
-
-echo "Created secrets: ${SECRETS[*]}"
+chmod 600 "$env_path"
+echo "Wrote $env_path with DB_NAME, DB_USER, DB_ROOT_PASSWORD and DB_USER_PASSWORD"

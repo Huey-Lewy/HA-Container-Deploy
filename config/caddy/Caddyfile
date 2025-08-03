@@ -1,29 +1,14 @@
-# (Global options block) Turn off automatic HTTPS
-{
-    auto_https off
-}
-
-# (Site block) HTTP reverse proxy and load balancing
+# HTTP-only; no automatic HTTPS and no :443 site defined
 :80 {
     reverse_proxy web:80 {
-        health_path    /health
+        lb_policy random
+        health_uri /health
         health_interval 10s
-        health_timeout  2s
-        health_fails    3
-        health_passes   2
+        health_timeout 2s
+        health_status 200
     }
-
-    # Log HTTP requests to stdout in console format
     log {
         output stdout
         format console
     }
-}
-
-# (Site block) Catch HTTPS requests and redirect them back to HTTP
-:443 {
-    @https {
-        protocol https
-    }
-    redir @https http://{host}{uri} permanent
 }

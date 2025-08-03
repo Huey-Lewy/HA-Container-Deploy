@@ -5,13 +5,13 @@ header('Content-Type: application/json');
 $host = getenv('DB_HOST');
 $db   = getenv('DB_NAME');
 $user = getenv('DB_USER');
-$pw   = trim(file_get_contents(getenv('DB_PASSWORD_FILE')));
+$pw   = trim(getenv('DB_USER_PASSWORD'));
 
-// Connect
+// Connect…
 $dsn = "mysql:host=$host;dbname=$db;charset=utf8mb4";
 $opts = [
-  PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-  PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
 ];
 $pdo = new PDO($dsn, $user, $pw, $opts);
 
