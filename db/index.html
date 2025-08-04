@@ -3,7 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <title>Score Counter</title>
-  <link rel="stylesheet" href="styles/style.css">
+  <style>
+    * {
+        background-color: slategrey;
+        transform: scale(1.25);
+        transform-origin: top;
+    }
+
+    .center-header {
+        text-align: center;
+    }
+
+    h1 {
+        display: inline-block;
+        border-radius: 99px;
+        border: 2px solid black;
+        padding: 5px 20px;
+        margin: 0 auto;
+        margin-bottom: 40px;
+        text-align: center;
+        font-family: sans-serif;
+        background-color: gold;
+
+    }
+
+    button {
+        padding: 10px;
+        display: block;
+        margin: 20px auto;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        border: 2px solid black;
+        border-width: 2px;
+        background-color: navy;
+        color: white;
+        font-family: sans-serif;
+        font-size: large;
+        transition: background-color 0.2s ease;
+    }
+    button:hover {
+        background-color: blue;
+    }
+    button:active {
+        background-color: red;
+    }
+  </style>
 </head>
 <body>
   <div class="center-header">
