@@ -3,6 +3,7 @@
 **HA Container Deploy** is a one-step solution for deploying a high-availability PHP + NGINX web application with a MariaDB database on Docker Swarm. Key features include:
 - **High Availability**: Three synced PHP + NGINX replicas with a shared MariaDB backend.
 - **Load Balanced**: Caddy listens on port 80 for HTTP, acting as a reverse proxy and distributing incoming requests across all web replicas evenly.
+- **Automatic Scalability**: When the 2 replica "NGINX + PHP" containers ("web" containers) are under load, they will automatically scale up to 4 total containers. 
 - **One-Step Deployment**: Scripts handles managing secrets, networks, volumes, and stack setup.
 - **Cloud-Ready**: Optimized and developed for Docker Swarm on a Google Cloud Ubuntu VM instance.
 
@@ -70,7 +71,7 @@ sudo ufw allow 80/tcp    # Allow HTTP traffic for Caddy
 sudo ufw deny 3306/tcp   # Block external MariaDB access
 
 # 3. Make deployment scripts executable
-chmod +x scripts/*.sh
+sudo chmod +x scripts/*.sh
 
 # 4. Run the one-step deploy (will init Swarm if needed)
 sudo ./scripts/run.sh
@@ -80,16 +81,16 @@ sudo ./scripts/run.sh
 ```
 # 1. Check that the stack is deployed
 # You should see "ha_stack"
-docker stack ls
+sudo docker stack ls
 
 # 2. List the services in the stack
-# You should see: "ha_stack_db" (1/1), "ha_stack_web" (3/3), and "ha_stack_caddy" (1/1)
-docker service ls ha_stack
+# You should see: "ha_stack_db" (1/1), "ha_stack_web" (2/2), and "ha_stack_caddy" (1/1)
+sudo docker stack services ha_stack
 
 # 3. Inspect the tasks (containers) for each service
 # All containers should be "Running"
-docker service ps ha_stack_db
-docker service ps ha_stack_web
+sudo docker service ps ha_stack_db
+sudo docker service ps ha_stack_web
 ```
 
 ## Teardown & Clean up

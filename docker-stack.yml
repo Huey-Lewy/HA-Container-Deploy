@@ -5,7 +5,7 @@ services:
   caddy:
     image: caddy:2
     ports:
-      - "80:80"     # Accept traffic
+      - "80:80"   # Accept HTTP traffic
     configs:
       - source: caddyfile   # Mount Caddyfile
         target: /etc/caddy/Caddyfile
@@ -45,7 +45,7 @@ services:
       retries: 5
       start_period: 30s
 
-  # Web: PHP+NGINX tier with 3 replicas
+  # Web: PHP+NGINX tier with autoscaling (min 2, max 6)
   web:
     build:
       context: .
@@ -63,9 +63,20 @@ services:
       - ha_overlay
     deploy:
       mode: replicated
-      replicas: 3
+      replicas: 2
+      labels:
+        - "swarm.autoscaler=true"
+        - "swarm.autoscaler.minimum=2"
+        - "swarm.autoscaler.maximum=4"
       restart_policy:
         condition: on-failure
+      resources:
+        reservations:   # Guaranteed at all times
+          cpus: "0.10"      # 0.10 vCPU * 4 = 0.4 vCPU reserved
+          memory: 200M      #  200   MB * 4 = 0.8 GB   reserved
+        limits:         # Maximum burst per container
+          cpus: "0.22"      # 0.22 vCPU * 4 = 0.88 vCPU total
+          memory: 400M      #  400   MB * 4 = 1.6  GB   total
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost/health"]
       interval: 10s
