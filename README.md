@@ -3,9 +3,10 @@
 **HA Container Deploy** is a one-step solution for deploying a high-availability PHP + NGINX web application with a MariaDB database on Docker Swarm. Key features include:
 - **High Availability**: Three synced PHP + NGINX replicas with a shared MariaDB backend.
 - **Load Balanced**: Caddy listens on port 80 for HTTP, acting as a reverse proxy and distributing incoming requests across all web replicas evenly.
-- **Automatic Scalability**: When the 2 replica "NGINX + PHP" containers ("web" containers) are under load, they will automatically scale up to 4 total containers. 
-- **One-Step Deployment**: Scripts handles managing secrets, networks, volumes, and stack setup.
+- **Automatic Scalability**: When the 2 replica "NGINX + PHP" containers ("web" containers) are under load, they will automatically scale up to 4 total containers.
+- **LVM-Backed Storage**: Initializes an LVM physical and logical volume for persistent MariaDB database automatically on the specified device (e.g., `/dev/sdb`).
 - **Cloud-Ready**: Optimized and developed for Docker Swarm on a Google Cloud Ubuntu VM instance.
+- **One-Step Deployment**: Scripts handles managing secrets, networks, volumes, and stack setup.
 
 ## Repository Layout
 
@@ -46,7 +47,10 @@
 > _Newer releases, such as newer Docker or Docker Compose versions, may work but aren't verified._
 
 **Before you begin, make sure you have the following**:
-- **Hardware**: At least 2GB of RAM and 1 vCPU
+- **Minimum Hardware Requirements**:
+    - 2GB of RAM
+    - 1 vCPU
+    - ≥ 10 GB unallocated disk (e.g. `/dev/sdb`)
 - **Operating System**: Ubuntu 24.04 LTS
 - **Software**:
     - Docker 28.3.2
